@@ -1,0 +1,44 @@
+{
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "es6": true,
+    "node": true,
+    "mongo": true,
+    "shared-node-browser": true
+  },
+  "extends": [
+    "plugin:prettier/recommended",
+    "node",
+    "node/style-guide",
+    "plugin:node/recommended"
+  ],
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly"
+  },
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 2018
+  },
+  "plugins": ["node"],
+  "rules": {
+    "prettier/prettier": "error",
+    "no-commonjs": "off",
+    "import/no-commonjs": "off",
+    "space-before-function-paren": "off",
+    "template-curly-spacing": "off",
+    "import/no-nodejs-modules": "off",
+    "semi":"off",
+    "comma-dangle":"off",
+    "sort-imports": "error",
+    "no-unused-vars": "warn",
+    "no-console": "off",
+    "func-names": "off",
+    "no-process-exit": "off",
+    "object-shorthand": "off",
+    "class-methods-use-this": "off"
+  }
+}

@@ -1,0 +1,437 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "API",
+    "description": "A minimal and easy API",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "basePath": "/api",
+  "schemes": ["https", "http"],
+  "servers": [
+    {
+      "url": "https://domain/api",
+      "description": "The production API server"
+    },
+    {
+      "url": "http://localhost:50005/api",
+      "description": "The production API server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Get list of Tests and start answering",
+      "description": "Routes"
+    },
+    {
+      "name": "Answer and Result",
+      "description": "Routes for get answer by question and return results"
+    }
+  ],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/tests": {
+      "get": {
+        "tags": ["Get list of Tests and start answering"],
+        "summary": "It's first fetch - return all languages in system, for HomePage",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Languages"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tests/{languageId}": {
+      "parameters": [
+        {
+          "name": "languageId",
+          "in": "path",
+          "description": "languageId to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "style": "simple"
+        }
+      ],
+      "get": {
+        "tags": ["Get list of Tests and start answering"],
+        "summary": "Get first question by language ID, response - question, userId, languageId, ",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/StartAnswering"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "BAD",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "object" },
+                    "message": {
+                      "type": "string",
+                      "example": "Not found question by this language"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tests/cancel/{userId}": {
+      "post": {
+        "tags": ["Get list of Tests and start answering"],
+        "description": "If user want to cancel answering",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "userId to use",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/answer/{userId}": {
+      "parameters": [
+        {
+          "name": "userId",
+          "in": "path",
+          "description": "userId to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "style": "simple"
+        }
+      ],
+      "post": {
+        "tags": ["Answer and Result"],
+        "summary": "Answering check and return result checking and next question, the last check return all results and statistic",
+        "requestBody": {
+          "description": "Optional description in *Markdown*",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnswerSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnswerResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "BAD",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "object" },
+                    "message": {
+                      "type": "string",
+                      "example": "Not found question by this language"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/answer/skip/{userId}": {
+      "post": {
+        "tags": ["Answer and Result"],
+        "description": "If user want to skip this question and get next",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "userId to use",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "description": "Optional description in *Markdown*",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnswerSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnswerResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "BAD",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "object" },
+                    "message": {
+                      "type": "string",
+                      "example": "Not found question by this language"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnswerSchema": {
+        "type": "object",
+        "properties": {
+          "questionId": {
+            "type": "string"
+          },
+          "userAnswerNumber": {
+            "type": "number"
+          },
+          "questionNumber": {
+            "type": "number"
+          }
+        }
+      },
+      "ResultOfAnswers": {
+        "type": "object",
+        "properties": {
+          "finalResult": {
+            "type": "boolean",
+            "default": true,
+            "example": true
+          },
+          "allQuestionsCount": {
+            "type": "number",
+            "default": true,
+            "example": true
+          },
+          "result": { "$ref": "#/components/schemas/ResultAnswer" },
+          "userRightsAnswered": { "type": "number" },
+          "userRightAnsweredInPercentage": { "type": "number" },
+          "languageTitle": { "type": "string" },
+          "questions": {
+            "$ref": "#/components/schemas/FinalQuestions"
+          },
+          "timeStartAnswering": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ResultAnswer": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "object",
+            "properties": {
+              "userAnswerCorrectly": { "type": "boolean" },
+              "questionExposition": { "type": "string" },
+              "userAnswer": { "type": "number" },
+              "rightAnswer": { "type": "number" }
+            }
+          }
+        }
+      },
+      "AnswerResponse": {
+        "type": "object",
+        "properties": {
+          "$ref": "#/components/schemas/ResultAnswer",
+          "allQuestionsCount": {
+            "type": "number",
+            "default": 25,
+            "example": 25
+          },
+          "questionNumber": { "type": "string" },
+          "nextQuestion": {
+            "$ref": "#/components/schemas/Question"
+          }
+        }
+      },
+      "Questions": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "$ref": "#/components/schemas/Question"
+        }
+      },
+      "Question": {
+        "type": "object",
+        "properties": {
+          "questionText": {
+            "type": "string",
+            "required": true
+          },
+          "image": {
+            "type": "string"
+          },
+          "answers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "answerNumber": {
+                  "type": "number",
+                  "required": true
+                },
+                "answerText": {
+                  "type": "string",
+                  "required": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "FinalQuestions": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/FinalQuestion"
+        }
+      },
+      "FinalQuestion": {
+        "type": "object",
+        "properties": {
+          "questionText": {
+            "type": "string",
+            "required": true
+          },
+          "image": {
+            "type": "string"
+          },
+          "answers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "answerNumber": {
+                  "type": "number",
+                  "required": true
+                },
+                "answerText": {
+                  "type": "string",
+                  "required": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "StartAnswering": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "languageTitle": { "type": "string" },
+          "questionNumber": { "type": "number" },
+          "allQuestionsCount": { "type": "number" },
+          "question": {
+            "type": "object",
+            "$ref": "#/components/schemas/Question"
+          },
+          "questionNumber": { "type": "number" },
+          "allQuestionsCount": { "type": "number" }
+        }
+      },
+      "Language": {
+        "type": "object",
+        "properties": {
+          "languageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "required": true
+          },
+          "description": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string",
+            "format": "base64"
+          },
+          "pullQuestions": {
+            "type": "number"
+          },
+          "countQuestions": { "type": "number" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Languages": {
+        "type": "object",
+        "properties": {
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/Language"
+            }
+          }
+        }
+      }
+    }
+  }
+}
