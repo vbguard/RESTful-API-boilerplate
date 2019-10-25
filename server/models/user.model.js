@@ -7,13 +7,12 @@ const config = require('../../config/config');
 const UserSchema = new mongoose.Schema(
   {
     name: {
-      type: String,
-      trim: true,
-      required: true
+      firstName: String,
+      lastName: String,
+      fullName: String
     },
     email: {
       type: String,
-      required: true,
       unique: true,
       index: true,
       lowercase: true,
@@ -21,17 +20,16 @@ const UserSchema = new mongoose.Schema(
       match: /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
     },
     password: {
-      type: String,
-      required: true
+      type: String
     },
+    photo: String,
     token: {
       type: String
     },
-    facebookId: {
-      type: String
-    },
     googleId: {
-      type: String
+      type: String,
+      unique: true,
+      index: true
     }
   },
   { timestamps: true }
@@ -41,16 +39,10 @@ UserSchema.methods.getPublicFields = function() {
   const returnObject = {
     userData: {
       name: this.name,
-      age: this.age,
       email: this.email,
-      isChild: this.isChild,
-      scores: this.scores,
-      avatar: this.avatar
+      photo: this.photo
     },
-    token: this.token,
-    childs: this.childs,
-    tasks: this.tasks,
-    goals: this.goals
+    token: this.token
   };
   return returnObject;
 };
@@ -58,7 +50,13 @@ UserSchema.methods.getPublicFields = function() {
 // Saves the user's password hashed (plain text password storage is not good)
 UserSchema.pre('save', function(next) {
   const user = this;
-  if (this.isModified('password') || this.isNew)
+
+  if (
+    // eslint-disable-next-line no-extra-parens
+    (user.password && this.isModified('password')) ||
+    // eslint-disable-next-line no-extra-parens
+    (user.password && this.isNew)
+  )
     bcrypt.genSalt(10, (err, salt) => {
       if (err) return next(err);
 
@@ -110,10 +108,10 @@ UserSchema.methods.getJWT = function() {
     {
       id: this._id
     },
-    config.JWT_SECRET_KEY
+    config.secretJwtKey
   );
 
-  const token = `Bearer ${preToken}`;
+  const token = preToken;
 
   this.token = token;
   this.save();

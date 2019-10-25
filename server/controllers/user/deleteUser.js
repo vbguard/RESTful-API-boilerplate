@@ -1,7 +1,7 @@
 const User = require('../../models/user.model');
 
 const deleteUser = (req, res) => {
-  const userId = req.user._id;
+  const userId = req.user.id;
 
   const sendResponse = result => {
     res.json({

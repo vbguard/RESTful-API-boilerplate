@@ -18,7 +18,7 @@ const config = require('../config/config');
 const app = express();
 
 // Connect Mongo DB
-require('../config/mongodb');
+require('../config/mongodb')();
 
 const isDevMode = process.env.NODE_ENV !== 'production';
 // view engine setup
@@ -59,7 +59,7 @@ app
   .get('/', (req, res) => {
     res.render('index', { name: 'John' });
   })
-  .use(config.apiPATH, router)
+  .use(config.apiPATH + config.apiVersion, router)
   .use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
   // catch 404 and forward to error handler

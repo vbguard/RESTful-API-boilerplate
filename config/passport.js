@@ -1,15 +1,18 @@
+/* eslint-disable no-undef */
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const LocalStrategy = require('passport-local').Strategy;
 // const FacebookStrategy = require('passport-facebook').Strategy;
-// const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 const User = require('../server/models/user.model.js');
+
+const { secretJwtKey, googleClientId, googleClientKey } = require('./config');
 
 module.exports = function(passport) {
   const opts = {};
   opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-  opts.secretOrKey = 'secret_super_nano_KEY_MEGA';
+  opts.secretOrKey = secretJwtKey;
 
   passport.use(
     new JwtStrategy(opts, (jwt_payload, done) => {
@@ -83,31 +86,54 @@ module.exports = function(passport) {
   // );
 
   // passport.use(
-  //   new GoogleStrategy(
+  //   new OAuth2Strategy(
   //     {
-  //       clientID: '',
-  //       clientSecret: '',
-  //       callbackURL: `https://domain/api/auth/google/callback`
+  //       authorizationURL: 'http:///oauth2/authorize',
+  //       tokenURL: 'https://www.example.com/oauth2/token',
+  //       clientID: EXAMPLE_CLIENT_ID,
+  //       clientSecret: EXAMPLE_CLIENT_SECRET,
+  //       callbackURL: 'http://localhost:3000/auth/example/callback'
   //     },
-  //     async (accessToken, refreshToken, profile, done) => {
-  //       console.log(profile);
-  //       try {
-  //         const user = await User.findOne({ googleId: profile.id });
-
-  //         if (user) return done(err, user);
-  //         if (!user) {
-  //           const newUser = await new User({
-  //             googleId: profile._json.sub,
-  //             name: profile._json.name,
-  //             avatar: profile._json.picture
-  //           });
-
-  //           newUser.save((err, user) => done(err, user));
-  //         }
-  //       } catch (error) {
-  //         done(error, null);
-  //       }
-  //     }
+  //     ((accessToken, refreshToken, profile, cb) => {
+  //   User.findOrCreate({ exampleId: profile.id }, function (err, user) {
+  //     return cb(err, user);
+  //   });
+  // })
   //   )
   // );
+
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: googleClientId,
+        clientSecret: googleClientKey,
+        callbackURL: `http://localhost:5000/api/v1/auth/google/callback`
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const user = await User.findOne({ googleId: profile.id });
+
+          if (user) {
+            const token = user.getJWT();
+            return done(null, { ...user, token });
+          }
+          if (!user) {
+            const newUser = await new User({
+              googleId: profile._json.sub,
+              name: { fullName: profile._json.name },
+              photo: profile._json.picture,
+              email: profile._json.email
+            });
+
+            newUser.save((err, user) => {
+              const token = user.getJWT();
+              return done(err, { ...user, token });
+            });
+          }
+        } catch (error) {
+          done(error, null);
+        }
+      }
+    )
+  );
 };

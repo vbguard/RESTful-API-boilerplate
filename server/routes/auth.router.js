@@ -10,17 +10,25 @@ const passportCheck = passport.authenticate('jwt', {
 router
   .post('/login', login)
   .get(
-    '/facebook',
-    passport.authenticate('facebook', { session: false, scope: ['email'] })
+    '/google',
+    passport.authenticate('google', {
+      session: false,
+      scope: ['profile']
+    })
   )
   .get(
-    '/auth/facebook/callback',
-    passport.authenticate('facebook', { session: false, failureRedirect: '/' }),
-
+    '/google/callback',
+    passport.authenticate('google', {
+      session: false,
+      failureRedirect: 'http://localhost:3000/login?error="auth bad"'
+    }),
     // on succes
     (req, res) => {
       // return the token or you would wish otherwise give eg. a succes message
-      res.render('json', { data: JSON.stringify(req.user.access_token) });
+      res.redirect(
+        301,
+        `http://localhost:3000/books?token=${req.user.token}&remove`
+      );
     },
 
     // on error; likely to be something FacebookTokenError token invalid or already used token,
@@ -34,7 +42,6 @@ router
       }
     }
   )
-
   .post('/register', register)
   .post('/logout', passportCheck, logOut);
 

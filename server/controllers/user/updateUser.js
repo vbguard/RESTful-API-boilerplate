@@ -57,10 +57,15 @@ const updateUser = (req, res) => {
     return;
   }
 
-  const userId = req.user._id;
+  const userId = req.user.id;
 
   User.findOneAndUpdate({ _id: userId }, { $set: validData }, { new: true })
     .then(user => {
+      if (validData.password)
+        return sendResponse({
+          status: 'OK',
+          message: `Password successfully added to ${user.email} `
+        });
       sendResponse(user.getPublicFields());
     })
     .catch(err => {
